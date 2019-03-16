@@ -1,0 +1,60 @@
+lding Infrastructure with Microsoft Azure and Ansible
+-----------------------------------------------------------
+Preparing Ansible to work with Azure
+------------------------------------
+1.Insatll Azure SDK on Host running Azure SDK on a host running Ansible
+
+  #pip install ansible[azure]
+
+2.we can creare a credential file inside .azure in the home directory
+
+  # vim ~/.azure/credential
+   
+    [default]
+    subscription_id=xxxxxx-xxx-xxxx-xxx
+    client_id=xxxx-xxx-xxxx
+    secret=xxxxxx
+    tenant=xxx-xx-xxxx-xxxxxx-xx
+
+yum update
+
+yum install vim wget
+
+vim /etc/ssh/sshd_config
+
+passwordAuthentication yes
+
+systemctl restart sshd.service
+
+ssh-keygen
+
+ssh-copy-id -i ~/.ssh/id_rsa.pub localhost
+
+wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+rpm -Uvh epel-release-latest-7.noarch.rpm
+
+yum groupinstall -y 'development tools'
+
+yum -y install python-pip python-devel
+
+pip install setuptools --upgrade
+
+pip install --upgrade pip
+
+pip install ansible
+
+ansible --version
+
+pip install boto
+
+pip install boto3
+
+vim ~/.boto
+[default]
+aws_access_key_id = AKIAIPXY65WY35LVIFUQ
+aws_secret_access_key = 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
+
+
+aws_secret_access_key = 2XcJQLTguv+WHVXI+mviMNsediUHV4+n7OCVPxCh
+

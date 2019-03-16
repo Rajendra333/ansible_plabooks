@@ -1,0 +1,28 @@
+---
+- hosts: windows
+  tasks: 
+    - name: get packages info
+      raw: powershell.exe -C "Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table –AutoSize"
+      register: package_info
+    - name: name of the host
+      raw: powershell.exe -C " hostname " 
+      register: host_info
+    - name: date of the system
+      raw: powershell.exe -C " date "
+      register: system_date
+    - name:  template for system info
+      template:
+        src: result.j2
+        dest: /home/ansadm/result.txt
+        force: yes
+      delegate_to: local_host
+  
+----------------------------------
+result.j2
+------------
+{{ package_info }}
+
+{{ host_info }}
+
+{{ system_date }}
+-------------------------------

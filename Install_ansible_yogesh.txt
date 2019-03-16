@@ -1,0 +1,164 @@
+Install Ansible on Redhat
+---------------------------
+-->To see repo list in machine
+# yum repolist
+chech here epel repository is available or not
+--> create epel repo
+
+ #rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+-->intsall ansible
+
+#yum install ansible
+
+-->To check validate installation
+
+# rpm -qa | grep ansible
+
+-->To see the details of package
+
+#rpm -ql <package name> (output of above package)
+
+-->Create user for ansible control
+
+#useradd -d /home/ansadm -m ansadm
+
+-->add password to adsadm
+
+#passwd ansadm
+
+-->To set the password is non-expiry
+
+#passwd -x -l ansadm
+
+Note:
+----
+-->create user and set password on remote nodes,follow the above steps for creating 
+   user and add password
+
+Setup SSH on Ansible-control
+-----------------------------
+Step:1
+
+-->1st login into ansadm user
+ #su - ansadm
+-->Generate ssh key using ssh-keygen 
+ #ssh-keygen -t rsa
+-->Now copy the id_rsa.pub and paste into remote nodes
+ #cat /home/ansadm/.ssh/id_rsa.pub
+-->Now go to remote node for paste id_rsa.pub key , for this follow bellow steps
+  -->Now go to app-server
+ #su - ansadm
+ #mkdir .ssh
+ #chmod 700 .ssh/
+ #chown ansadm:ansadm .ssh/
+ #cd .ssh
+ #vi authorized_keys
+  here paste the id_rsa.pub key 
+  :wq!
+ #chown ansadm:ansadm authorized_keys/
+ #chmod 600 authorized_key
+-->Now go to ansible-control and then setup Local host file(it's not inventory file)
+
+ #vi /etc/hosts
+  <ip of ansible-control>  ansible-control
+  <ip of appserver>        appserver
+  <ip of dbserver>         dbserver
+  :wq!
+-->Now check ssh connection is working or not
+  #ssh appserver
+-->The file /etc/ansible has only root user permission and it's group is root,
+   now we have to change to ansadm user because ansadm user manages ansible-controll
+ #chown -R ansadm:ansadm /etc/ansible
+
+-->Now setup the inventory file in ansible-control
+-->login into ansadm in ansible-control
+ #vi /etc/ansible/hosts
+  [appgroup]
+  appserver
+  
+  [dbgroup]
+  dbserver
+  :wq!
+-->we want to see the all modules availale in ansible
+  #ansible-doc -l | more
+-->we want to count all modules
+  #ansible-doc -l | wc -l
+-->we want see particular module usage
+  #anisble-doc -s yum
+  here yum is the module
+-->To check connection status of remote servers
+  #ansible all -m ping 
+ the above oupput is displayed in 3 lines,we want see in 1 line add -o to the command
+  #anisble all -m ping -o
+-->we want to see disk free and uname of the remote servers
+  #ansible all -m shell -a "uname -a;df -h"
+-->we want see the which is protocal or file is running when we run the command ansible, for this 
+   add -v(verbose) at end of the command 
+  #ansible all -m shell -a "uname -a;df -h" -v
+-->Ansible is working on modules
+Note:
+------
+-->when you run the ansible commands, you may face following error
+  "you need to be root to perform this command"
+-->if you face above error,we have to follow the followin steps
+step1:
+----
+-->To solve the above issue,you should give sudo rule to ansadm in remote servers
+  -->login root user in remote nodes
+ #su - root
+ #vi /etc/sudoers
+  ## ANSIBLE ADMIN user
+     ansadm ALL=NOPASSWD: ALL
+  :wq!
+-->if you run the command now, it still fails because ansible-control run on ansadm user which 
+   has sudo rule, so you have to use -s at end of the command. -s indicates the use sudo on remote node
+
+step2:
+------
+ #ansible all -m yum -a "name=httpd state=present" -s
+-->now the command is executed successfully
+
+-->To check the package is installed or not
+  #rpm -qa | grep httpd
+
+-->To check the service status
+ #service httpd  status
+-------------------------------------
+Install the ansible-cmdb
+------------------------------
+ #pip install ansible-cmdb
+
+-------------------------------------------------------
+practised ansible manage node
+----------------------------
+cat /etc/hosts
+--------------
+13.58.252.250 localhost
+3.16.159.250 appserver
+18.188.102.76 dbserver
+18.218.235.34 windows
+
+cat /etc/ansible/hosts
+------------------------
+windows ansible_host=18.218.235.34 ansible_password=NH*jMH6EiGTdCQV4)K)@NqLKxDcLhv45 ansible_connection=winrm ansible_port=5986 
+ansible_user=Administrator ansible_winrm_server_cert_validation=ignore
+
+[appgroup]
+appserver
+
+[localhost1]
+localhost
+
+[dbgroup]
+dbserver
+-------------------------------------------------
+
+Install ansible on ubuntu
+--------------------------
+--> add ansible repository
+ #apt-add-repository ppa:ansible/ansible
+-->install ansible
+ # apt-get install anisble
+Note:Remaining configuration settings as same as above
+

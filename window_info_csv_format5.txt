@@ -1,0 +1,211 @@
+Get system info from windows host for multiple nodes
+-------------------------------------------------------
+Method-1
+--------
+---
+- hosts: windows
+  connection: local
+  vars:
+    output_path: "/home/ansadm/lakshman/"
+    filename: "network_device_info_{{ inventory_hostname }}.csv"
+    device_hostname: " {{ ansible_hostname }}"
+    device_systemdate: " {{ ansible_date_time.date }}"
+
+  tasks:
+    - name: Get date for folder creation
+      set_fact: date="{{ lookup('pipe', 'date +%Y-%m-%d') }}"
+      tags: date_stamp
+      run_once: true
+
+    - name: Get installed packages
+      raw: powershell.exe -C " Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName"
+      register: package_info
+    - name: version info
+      raw: powershell.exe -C " Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayVersion"
+      register: package_version
+
+    - name: create backup folder
+      file:
+       path: "{{ output_path }}/{{ date }}"
+       state: directory
+       recurse: yes
+      run_once: true
+      tags: create_backup_folder
+      delegate_to: localhost
+
+    - name: get timestamp for creation
+      set_fact: datetime="{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%s') }}"
+      run_once: true
+      tags: time_stamp
+      delegate_to: localhost
+
+    - name: extract values
+      set_fact:
+        csv_data: "{{ ansible_hostname }},{{ ansible_date_time.date }},{{ package_info.stdout }}, {{ package_version.stdout }}"
+
+    - name: output information to csv file
+      shell: |
+         echo URL: "HOSTNAME: {{ansible_hostname}} DATE: {{ansible_date_time.date}} PACKAGES: {{package_info.stdout}} versions: {{package_version.stdout}}" >> {{ output_path }}/{{ filename }}
+      delegate_to: localhost
+
+------------------------------------------------------------------------------
+method-2
+--------------
+---
+- hosts: windows
+  connection: local
+  vars:
+    output_path: "/home/ansadm/lakshman1/"
+    filename: "network_device_info_{{ inventory_hostname }}.csv"
+    device_hostname: " {{ ansible_hostname }}"
+    device_systemdate: " {{ ansible_date_time.date }}"
+
+  tasks:
+    - name: Get date for folder creation
+      set_fact: date="{{ lookup('pipe', 'date +%Y-%m-%d') }}"
+      tags: date_stamp
+      run_once: true
+
+    - name: Get installed packages
+      raw: powershell.exe -C " Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName"
+      register: package_info
+    - name: version info
+      raw: powershell.exe -C " Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayVersion"
+      register: package_version
+
+    - name: create backup folder
+      file:
+       path: "{{ output_path }}/{{ date }}"
+       state: directory
+       recurse: yes
+      run_once: true
+      tags: create_backup_folder
+      delegate_to: localhost
+
+    - name: get timestamp for creation
+      set_fact: datetime="{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%s') }}"
+      run_once: true
+      tags: time_stamp
+      delegate_to: localhost
+
+    - name: extract values
+      set_fact:
+        csv_data: "{{ ansible_hostname }},{{ ansible_date_time.date }},{{ package_info.stdout }}, {{ package_version.stdout }}"
+
+    - name: output information to csv file
+      lineinfile:
+        dest: "{{ output_path }}/{{ filename }}"
+        state: present
+        create: yes
+      delegate_to: localhost
+-------------------------------------------------------------------
+method-3
+-------------
+---
+- hosts: windows
+  connection: local
+  vars:
+    output_path: "/home/ansadm/lakshman/"
+    filename: "network_device_info_{{ inventory_hostname }}.csv"
+    device_hostname: " {{ ansible_hostname }}"
+    device_systemdate: " {{ ansible_date_time.date }}"
+
+  tasks:
+    - name: Get date for folder creation
+      set_fact: date="{{ lookup('pipe', 'date +%Y-%m-%d') }}"
+      tags: date_stamp
+      run_once: true
+
+    - name: Get installed packages
+      raw: powershell.exe -C " Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName"
+      register: package_info
+    - name: version info
+      raw: powershell.exe -C " Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayVersion"
+      register: package_version
+
+    - name: create backup folder
+      file:
+       path: "{{ output_path }}/{{ date }}"
+       state: directory
+       recurse: yes
+      run_once: true
+      tags: create_backup_folder
+      delegate_to: localhost
+
+    - name: get timestamp for creation
+      set_fact: datetime="{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%s') }}"
+      run_once: true
+      tags: time_stamp
+      delegate_to: localhost
+
+    - name: extract values
+      set_fact:
+        csv_data: "{{ ansible_hostname }},{{ ansible_date_time.date }},{{ package_info.stdout }}, {{ package_version.stdout }}"
+
+    - name: output information to csv file
+      lineinfile:
+        dest: "{{ output_path }}/{{ filename }}"
+        line: "{{ ansible_hostname }},{{ ansible_date_time.date }},{{ package_info.stdout }}, {{ package_version.stdout }}"
+        state: present
+        create: yes
+      delegate_to: localhost
+-------------------------------------------------------------------------------
+method-4 using-j2 template
+---
+- hosts: windows
+  tasks:
+    - name: get packages info
+      raw: powershell.exe -C " Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName"
+      register: package_info
+    - name: version info
+      raw: powershell.exe -C " Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName"
+      register: package_version
+
+    - name: name of the host
+      raw: powershell.exe -C " hostname "
+      register: host_info
+    - name: date of the system
+      raw: powershell.exe -C " date "
+      register: system_date
+    - name:  template for system info
+      template:
+        src: result.j2
+        dest: /home/ansadm/new_result.csv
+        force: yes
+      delegate_to: localhost
+    - name:  template for system info
+      template:
+        src: result.j2
+        dest: /home/ansadm/new_result.txt
+        force: yes
+      delegate_to: localhost
+------------------------------------------------------------------------------
+result.j2
+----------
+#Hostdate              #Hostname       #Installed softwares #software-version
+
+{{ system_date.stdout }} {{ host_info.stdout }} {{ package_info.stdout }} {{ package_version.stdout }}
+---------------------------------------------------------------------------------
+method-5
+---------------------
+---
+- hosts: windows
+  tasks:
+  vars:
+    output_path: "/home/ansadm/lakshman/"
+    filename: "network_device_info_{{ inventory_hostname }}.csv"
+    - name: Display_hostname
+      debug:
+        var=ansible_hostname
+    - name: system_date
+      debug:
+        var=ansible_date_time.date
+    - name:
+      raw: Get-package | Select-Object @{Expression={$_.name};Label="PackageName"}, @{Expression={$_.version};Label="version"} | Export-Csv "C:\Temp\laksh.csv -NoTypeInformation"
+    - name: Fetch output file
+      fetch:
+        src: C:/Temp/laksh.csv
+        dest: {{ output_path }}/{{ filename }}
+        flat: yes
+--------------------------------------------------------------------------
+

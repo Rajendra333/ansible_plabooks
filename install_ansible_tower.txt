@@ -1,0 +1,30 @@
+Install_Ansible_tower
+---------------------
+
+--> check yum repos
+   # yum repolist
+-->check ansible installed or not
+  # rpmquery ansible
+-->Install rpm repos to server
+  #rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+-->install ansible
+  # yum install ansible
+--> install wget
+  # yum install wget
+-->download ansible-tower tar bolls
+  #wget https://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-latest.tar.gz
+-->extract tar bolls
+  # tar xvzf ansible-tower-setup.latest.tar.gz
+  # cd ansible-tower-setup-3.4.2-1/
+  #./setup.sh
+-->set password in inventory
+   amdin_password
+   pg_password
+   rabbitmq_password
+
+-->vi etc/hosts
+   <ip of localhost> localhost
+
+-->Then go to www.ansible.com and select free trial ansible tower
+   give the details for getting license
+-->after getting license goto brower enter ip of local 

@@ -1,0 +1,10 @@
+---
+- hosts: windows
+  gather_facts: false
+  tasks: 
+    - name: create user
+      win_user: 
+        name: lakshman
+	password: "@ns1bl3"
+	state: present
+		

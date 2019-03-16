@@ -1,0 +1,68 @@
+---
+- hosts: localhost1
+  connection: local
+  tasks:
+    - name: get system info
+      raw: ansible --version
+      register: system_info
+    - debug: var=system_info.stdout
+------------------------------------------------
+---
+- hosts: localhost1
+  connection: local
+  tasks:
+    - name: get system info
+      raw: uname -a
+      register: system_info
+    - debug: var=system_info.stdout
+--------------------------------------------
+---
+- hosts: appserver
+  tasks:
+    - name: get system info
+      raw: uname -a
+      register: system_info
+    - debug: var=system_info.stdout
+----------------------------------------------
+---
+- hosts: appserver
+  tasks:
+    - name: get system info
+      raw: uname -a
+      register: system_info
+    - name: template for system_info
+      template:
+        src: system.j2
+        dest: /home/ansadm/system.txt
+-------------------------------------------------------
+---
+- hosts: appserver
+  tasks:
+    - name: get system info
+      raw: uname -a
+      register: system_info
+    - name: template for system_info
+      template:
+        src: system.j2
+        dest: /home/ansadm/system.txt
+      delegate_to: localhost
+------------------------------------------------------
+---
+- hosts: appserver
+  tasks:
+    - name: get system info
+      raw: hostname
+      register: system_name
+    - name: installed packages list
+      raw: rpm -qa | head -n 3
+      register: system_packages
+    - name: systme date
+      raw: date
+      register: system_date
+    - name: template for system_info
+      template:
+        src: system.j2
+        dest: /home/ansadm/system.txt
+        force: yes
+      delegate_to: localhost
+---------------------------------------------------------

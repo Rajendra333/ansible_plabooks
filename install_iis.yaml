@@ -1,0 +1,38 @@
+---
+- hosts: windows
+  
+  tasks:
+    - name: Testing connection
+	  win_ping:
+	  
+# Restart snmp
+    - name: Snmp service is started
+	  win_service:
+	   name: snmptrap
+	   state: started
+	
+	- name: Installing IIS on the server
+	  win_feature:
+	    name: "Web-server"
+		state: present
+		restart: yes
+		include_sub_features: yes
+		include_management_tools: yes
+		
+		
+	- name: Deploying the website
+	  win_copy: src=/etc/ansible/files/win/html/ dest=c:/inetpub/wwwroot
+	  notify: iis reset
+	  
+	  - iis reset
+	- name: restarting the appool
+	  win_iis_webapppool:
+	     name: "DefaultAppPool"
+		 state: restarted
+		 
+  handlers:
+  
+    - name: iis reset
+	  win_service:
+	     name: w3svc
+		 state: restarted

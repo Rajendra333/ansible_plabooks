@@ -1,0 +1,28 @@
+create a directory in local machine
+----------------------------------
+---
+- hosts: localhost1
+  connection: local
+  tasks:
+    - name: creating a temp directory
+      local_action: shell mkdir sample
+      register: temdir
+--------------------------------------
+
+---
+- hosts: localhost1
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: creating a temp directory
+      local_action: shell mkdir sample1
+      register: temdir
+      tags: dir
+
+    - name: create a file
+      local_action: command touch demo1
+      tags: file
+-----------------------------------------
+
+
+

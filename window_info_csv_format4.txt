@@ -1,0 +1,52 @@
+New_csv.yaml
+----------------------------------
+---
+- hosts: windows
+  tasks:
+    - name: hostname
+      debug:
+        var=ansible_hostname
+    - name: system_date
+      debug:
+        var=ansible_date_time.date
+    - name: script
+      win_copy:
+        src: /home/ansadm/csv/new_installed.ps1
+        dest: C:\Users\Administrator\Downloads\
+    - name: execute powershell
+      win_shell: Powershell.exe -ExecutionPolicy Bypass -File C:\Users\Administrator\Downloads\new_installed.ps1
+    - name: Get output file
+      fetch:
+        src: C:\Users\Administrator\Downloads\new_sample.csv
+        dest: /home/ansadm/csv/new_sample.csv
+        flat: yes
+-----------------------------------------------------------
+new_installed.ps1
+-------------------
+Get-content env:computername; Get-package | Select-Object name, version | Export-Csv "C:\Users\Administrator\Downloads\new_sample.csv"
+-----------------------------------------------------------------
+---
+- hosts: windows
+  tasks:
+    - name: hostname
+      debug:
+        var=ansible_hostname
+    - name: system_date
+      debug:
+        var=ansible_date_time.date
+    - name: script
+      win_copy:
+        src: /home/ansadm/csv/script.ps1
+        dest: C:\Users\Administrator\Downloads\
+    - name: execute script
+      win_shell: Powershell.exe -ExecutionPolicy Bypass -File C:\Users\Administrator\Downloads\script.ps1
+
+    - name: Get output
+      fetch:
+        src: C:/Users/Administrator/Downloads/sample.csv
+        dest: /home/ansadm/csv/sample.csv
+        flat: yes
+-----------------------------------------------------------------------
+script.ps1
+---------
+et-package | Select-Object name, version > C:\Users\Administrator\Downloads\sample.csv

@@ -1,0 +1,47 @@
+---
+- hosts: windows
+  tasks:
+    - name: hostname
+      debug:
+        var=ansible_hostname
+
+
+    - name: date and time
+      vars:
+       msg: |
+        Date: {{ ansible_date_time.date }}
+        Timezone: {{ ansible_date_time.tz }}
+      debug:
+       msg: "{{ msg.split('\n') }}"
+    - name: installed packages
+      win_shell: powershell.exe -C "Get-package"
+      register: package
+
+    - name: get packages
+      vars:
+       msg: |
+        pack: {{ package }}
+      debug:
+        msg: "{{ msg.split('\n') }}"
+
+    - name: set
+      set_fact: packages={{package.stdout_lines.0}}
+    - name:  template for system info
+      template:
+        src: output.j2
+        dest: /home/ansadm/csv/result.csv
+        force: yes
+      delegate_to: localhost
+----------------------------------------------------------------------
+# Hostname                #date                            #timezone
+
+
+{{ ansible_hostname }}         {{ ansible_date_time.date}}      {{ ansible_date_time.tz }}
+
+#date
+{{ ansible_date_time.date }}
+
+#time
+{{ ansible_date_time.tz }}
+
+----------------------------------------------------

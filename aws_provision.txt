@@ -1,0 +1,170 @@
+Create keypair in aws
+-------------------------
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    region: us-east-2
+  tasks:
+    - name: add key
+      ec2_key:
+         name: mykey
+         region: "{{ region }}"
+         state: present
+-----------------------------------
+---
+- hosts: localhost
+  connection:local
+  gather_facts: no
+  tasks:
+    - name: Setting up Security/Firewall Group
+      ec2_group:
+         name: MY_AWS_Security_Grp
+         description: Rules Allowing Traffic on port 22 and 80
+         region: us-east-2
+         rules:
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+          - proto: icmp
+            from_port: -1
+            to_port: -1
+            cidr_ip: 0.0.0.0/0
+         rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+ 
+    - name: Provision a EC2 Instance
+      ec2:
+         key_name: New_key
+         region: us-east-2
+         instance_type: t2.micro
+         image: ami-0b500ef59d8335eee 
+         wait: yes
+         wait_timeout: 500
+         count: 1
+         instance_tags:
+           Name: Aws_instances
+           Owner: lakshman
+         volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 2
+         monitoring: no
+         vpc_subnet_id: subnet-6253932e 
+         assign_public_ip: yes
+         group: MY_AWS_Security_Grp
+      register: ec2_out
+ 
+    - name: Wait for SSH to come up
+      wait_for: host={{ item.public_dns_name }} port=22 delay=60 timeout=320 state=started
+      with_items: '{{ec2_out.instances}}'
+-------------------------------------------------------------------------------------------------------
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  tasks:
+
+    - name: Provision a set of instances
+      ec2:
+         key_name: New_Key
+         group: New_security
+         region: us-east-2
+         instance_type: t2.micro
+         image: ami-0b500ef59d8335eee
+         wait: true
+         wait_timeout: 500
+         volumes:
+           - device_name: /dev/xvda
+             volume_type: gp2  #insert the volume code here
+             volume_size: 20  #size is in GB
+         exact_count: 1
+         count_tag:
+            Name: Demo2
+         instance_tags:
+            Name: Demo2
+      register: ec2
+
+    - name: Add all instance public IPs to host group
+      add_host: hostname={{ item.public_ip }} groups=webserver
+      loop: "{{ ec2.instances }}"
+
+
+- hosts: webserver
+  name: configuration play
+  user: ec2-user
+  gather_facts: false
+
+  tasks:
+
+    - name: install tomcat
+      yum: name=tomcat7 state=present
+      notify:
+        - start tomcat
+  handlers:
+    - name: start tomcat
+      service: name=tomcat7 state=started
+----------------------------------------------------------------------------
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  tasks:
+
+    - name: Provision a set of instances
+      ec2:
+         key_name: New_Key
+         group: New_security
+         region: us-east-2
+         instance_type: t2.micro
+         image: ami-0b500ef59d8335eee
+         wait: true
+         wait_timeout: 500
+         volumes:
+           - device_name: /dev/xvda
+             volume_type: gp2  #insert the volume code here
+             volume_size: 20  #size is in GB
+         exact_count: 1
+         count_tag:
+            Name: Demo2
+         instance_tags:
+            Name: Demo2
+      register: ec2
+    - name: Wait for SSH to come up
+      wait_for: host={{ item.public_dns_name }} port=22 delay=60 timeout=320 sta                                                                             te=started
+      with_items: '{{ec2.instances}}'
+
+    - name: Add all instance public IPs to host group
+      add_host: hostname={{ item.public_ip }} groups=webserver
+      loop: "{{ ec2.instances }}"
+
+
+- hosts: webserver
+  name: configuration play
+  user: ec2-user
+  gather_facts: false
+
+  tasks:
+    - name: Install basic software
+      yum:
+        name: "{{ item }}"
+        state: present
+        with_items:
+          - java-1.8.0-openjdk
+          - tomcat8
+      notify:
+        - start tomcat
+  handlers:
+    - name: start tomcat
+      service: name=tomcat7 state=started
+----------------------------------------------------------------------------------------
+

@@ -1,0 +1,195 @@
+- hosts: windows
+  connection: local
+  vars:
+    output_path: "/home/ansadm"
+
+  tasks:
+
+    - name: Get System name
+      raw: powershell.exe -C "hostname"
+      register: System_name
+
+    - name: Get installed pakcage_info
+      raw: powershell.exe -C "Get-CimInstance -ComputerName (Get-Content C:\Temp\Computer.txt) -ClassName win32_product -ErrorAction SilentlyContinue| Select-Object InstallDate | Out-GridView"
+      register: installed_package_info
+
+
+    - name: Display system_date
+      raw: powershell.exe -C "date"
+      register: system_date
+
+
+    - set_fact:
+        csv_data1: "SYSTEMD:{{ system_date }}"
+        csv_data2: "{{ System_name }}"
+        csv_data3: "{{installed_package_info}}"
+
+    - name: create file for output
+      shell: touch new_data.csv
+      delegate_to: localhost
+
+    - name: using ansible blockinfile with_items
+      blockinfile:
+        dest: /home/ansadm/new_data.csv
+        block: |
+              {{ csv_data1 }}
+              hi this is lakshman
+              {{ csv_data2 }}
+              {{ csv_data3 }}
+      delegate_to: localhost
+
+-----------------------------------------------------------------------------------------------
+- hosts: windows
+  connection: local
+  vars:
+    output_path: "/home/ansadm"
+
+  tasks:
+
+    - name: Get System name
+      raw: powershell.exe -C "hostname"
+      register: System_name
+
+    - name: Get installed pakcage_info
+      raw: powershell.exe -C "Get-CimInstance -ComputerName (Get-Content C:\Temp\Computer.txt) -ClassName win32_product -ErrorAction SilentlyContinue| Select-Object InstallDate | Out-GridView"
+      register: installed_package_info
+
+
+    - name: Display system_date
+      raw: powershell.exe -C "date"
+      register: system_date
+
+
+    - set_fact:
+        csv_data1: "SYSTEMD:{{ system_date }}"
+        csv_data2: "{{ System_name }}"
+        csv_data3: "{{installed_package_info}}"
+
+    - name: create file for output
+      shell: touch new_data.csv
+      delegate_to: localhost
+
+    - name: using ansible blockinfile with_items
+      blockinfile:
+        dest: /home/ansadm/new_data.csv
+        block: |
+              SYSTME_DATE
+
+              {{ csv_data1 }}
+
+              SYSTEM_NAME
+
+
+              {{ csv_data2 }}
+
+              SYSTEM_PACKAGES
+
+              {{ csv_data3 }}
+      delegate_to: localhost
+-----------------------------------------------------------------------------------
+- hosts: windows
+  connection: local
+  vars:
+    output_path: "/home/ansadm"
+
+  tasks:
+
+    - name: Get System name
+      raw: powershell.exe -C "hostname"
+      register: System_name
+
+    - name: Get installed pakcage_info
+      raw: powershell.exe -C "Get-CimInstance -ComputerName (Get-Content C:\Temp\Computer.txt) -ClassName win32_product -ErrorAction SilentlyContinue| Select-Object InstallDate | Out-GridView"
+      register: installed_package_info
+
+
+    - name: Display system_date
+      raw: powershell.exe -C "date"
+      register: system_date
+
+
+#    - set_fact:
+#        csv_data1: "SYSTEMD:{{ system_date }}"
+#        csv_data2: "{{ System_name }}"
+#        csv_data3: "{{installed_package_info}}"
+
+    - name: create file for output
+      shell: touch new_data.csv
+      delegate_to: localhost
+
+    - name: using ansible blockinfile with_items
+      blockinfile:
+        dest: /home/ansadm/new_data.csv
+        block: |
+              SYSTME_DATE
+
+              {{ system_date }}
+
+              SYSTEM_NAME
+
+
+              {{ System_name  }}
+
+              SYSTEM_PACKAGES
+
+              {{ installed_package_info }}
+      delegate_to: localhost
+----------------------------------------------------------------------------------------------
+
+---
+- hosts: windows
+  connection: local
+  vars:
+    output_path: "/home/ansadm"
+
+  tasks:
+
+    - name: Get System name
+      raw: powershell.exe -C "hostname"
+      register: System_name
+
+    - name: Get installed pakcage_info
+      raw: powershell.exe -C "Get-CimInstance -ComputerName (Get-Content C:\Temp\Computer.txt) -ClassName win32_product -ErrorAction SilentlyContinue| Select-Object InstalledPackages | Out-GridView"
+      register: installed_package_info
+
+
+    - name: Display system_date
+      raw: powershell.exe -C "date"
+      register: system_date
+
+
+    - set_fact:
+        csv_data1: "SYSTEMD:{{ system_date }}"
+        csv_data2: "{{ System_name }}"
+        csv_data3: "{{installed_package_info}}"
+
+    - name: using ansible blockinfile with_items
+      blockinfile:
+        dest: /home/ansadm/new_data.csv
+        block: |
+          {{ item.name }}
+      with_items:
+        - { name: 'systme_date' }
+        - { name: 'installed_package_info' }
+        - { name: 'system_name' }
+      delegate_to: localhost
+
+------------------------------------------------------
+---
+- hosts: localhost
+  connection: local
+  tasks:
+
+    - name: using ansible blockinfile with_items
+      blockinfile:
+        dest: /home/ansadm/new_data.csv
+        block: |
+          {{ item.name }} --> {{ item.line }}
+      with_items:
+        - { name: systemdate, line:  line1}
+        - { name: systemname, line: line2 }
+        - { name: systempack, line: line3 }
+      delegate_to: localhost
+-----------------------------------------------------
+Get-WmiObject -Class Win32_product
+

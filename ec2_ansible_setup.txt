@@ -1,0 +1,277 @@
+Create Ec2-instances
+----------------------
+---
+- name: Create a new Demo EC2 instance
+  hosts: localhost
+  gather_facts: False
+
+  vars:
+      region: us-east-1
+      instance_type: t2.nano
+      ami: ami-f4cc1de2  # Ubuntu 16.04 LTS
+      keypair: einsteinish # pem file name
+  
+  tasks:
+
+    - name: Create an ec2 instance
+      ec2:
+         key_name: "{{ keypair }}"
+         group: einsteinish  # security group name
+         instance_type: "{{ instance_type}}"
+         image: "{{ ami }}"
+         wait: true
+         region: "{{ region }}"
+         count: 1  # default
+         count_tag:
+            Name: Demo
+         instance_tags:
+            Name: Demo
+         vpc_subnet_id: subnet-cef59af4
+         assign_public_ip: yes
+      register: ec2
+-------------------------------------------------
+- hosts: windows
+  connection: local
+# Basic user creation example
+tasks:
+- name: Create two new IAM users with API keys
+  iam:
+    iam_type: user
+    name: "{{ item }}"
+    state: present
+    password: "{{ temp_pass }}"
+    access_key_state: create
+  with_items:
+    - jcleese
+    - mpython 
+---------------------------------------------------
+---
+ - hosts: all
+   tasks:
+    - name: install apache and tomcat7
+      apt: name=apache2 state=latest
+      apt: name=tomcat7 state=latest
+      when: ansible_distribution=="Ubuntu" or ansible_distribution =="Debian"
+      notify:
+      - start services
+   handlers:
+   - name: start services
+     service: name=apache2 state=started
+     service: name=tomcat7 state=started
+   tasks:
+    - name: install httpd and tomcat7
+      yum: name=httpd state=latest
+      yum: name=tomcat7 state=latest
+      when: ansible_distribution=="CentOS" or ansible_distribution=="Red Hat Enterprise Linux"
+      notify:
+      - start httpd services
+   handlers:
+   - name: start httpd services
+     service: name=httpd state=started
+     service: name=tomcat7 state=started
+-------------------------------------------------------
+---
+ - hosts: CentOs
+   gather_facts: false
+   become: true
+   vars_prompt:
+     - name: Pack_name_Centos 
+       prompt: Enter the package name for Centos machines
+       private: no
+   tasks:
+    - name: install apache and tomcat7
+      yum: name= {{ Pack_name_Centos }} state=latest
+     
+ - hosts: ubuntu
+   gather_facts: false
+   become: true
+   vars_prompt:
+     - name: Pack_name_Ubuntu
+       prompt: Enter the package name for Ubuntu machines
+       private: no
+   tasks:
+    - name: install apache and tomcat7
+      yum: name= {{ Pack_name_Ubuntu }} state=latest     
+
+---------------------------------------------------------------
+---
+- hosts: oel7_prod
+  gather_facts: no
+  connection: ssh
+  tasks:
+   - name: Add group "nixadmins" to remote server
+     remote_user: ansible
+     become: yes
+     become_method: sudo
+     group:
+       name: nixadmins
+       gid: 2010
+       state: present
+
+   - name: Add group "Office" to the remote server
+     remote_user: ansible
+     become: yes
+     become_method: sudo
+     group:
+       name: office
+       gid: 2011
+       state: present
+
+   - name: Add group "Warehouse" to the remote server
+     remote_user: ansible
+     become: yes
+     become_method: sudo
+     group:
+       name: warehouse
+       gid: 2012
+       state: present 
+
+   - name: Add user "sysadmin" to the remote server
+     remote_user: ansible
+     become: yes
+     become_method: sudo
+     user:
+       name: sysadmin
+       comment: "Privileged User"
+       uid: 2001
+       group: nixadmins
+       groups: office,warehouse
+       append: yes
+       shell: /bin/bash
+       generate_ssh_key: yes
+       ssh_key_bits: 2048
+       ssh_key_file: .ssh/id_rsa
+
+   - name: Add user "Bobin" to the remote server
+     remote_user: ansible
+     become: yes
+     become_method: sudo
+     user:
+       name: bobin
+       comment: "Accountant UnPrivileged User"
+       uid: 2002
+       group: office
+       shell: /bin/bash
+       generate_ssh_key: yes
+       ssh_key_bits: 2048
+       ssh_key_file: .ssh/id_rsa
+
+   - name: Add user "Lonston" to the remote server
+     remote_user: ansible
+     become: yes
+     become_method: sudo
+     user:
+       name: lonston
+       comment: "Content creator UnPrivileged User"
+       uid: 2003
+       group: office
+       shell: /bin/bash
+       generate_ssh_key: yes
+       ssh_key_bits: 2048
+       ssh_key_file: .ssh/id_rsa
+
+   - name: Add user "Rajesh" to the remote server
+     remote_user: ansible
+     become: yes
+     become_method: sudo
+     user:
+       name: rajesh
+       comment: "Unix Admin Privileged User"
+       uid: 2004
+       group: nixadmins
+       groups: office,warehouse
+       append: yes
+       shell: /bin/sh
+       generate_ssh_key: yes
+       ssh_key_bits: 2048
+       ssh_key_file: .ssh/id_rsa
+
+   - name: Add user "Guest001" to the remote server
+     remote_user: ansible
+     become: yes
+     become_method: sudo
+     user:
+       name: guest001
+       comment: "Temp account"
+       uid: 2005
+       group: warehouse
+       shell: /bin/bash
+       createhome: no
+       password: ''
+       expires: 1525198731
+
+   - name: Force user "Guest001" to change the password
+     remote_user: ansible
+     become: yes
+     become_method: sudo 
+     command: 
+         chage -d 0 guest001
+
+   - name: Remove user "Games" from remote server
+     remote_user: ansible
+     become: yes
+     become_method: sudo
+     user:
+       name: games
+       state: absent
+       remove: yes
+--------------------------------------------------
+The Aws modules:
+----------------
+-->The Aws modules work similar to how most aws tools work.this is because they use 
+   the python boto library,which is popular with many other tools and follows the conventions
+   of the original aws tools that were released by amazon.
+-->Install the boto library in ubuntu
+   #apt-get install python-boto
+-->Install boto on centos/RHEL/Fedora
+    #yum install python-boto
+-->install boto on pip
+    #pin install boto
+-->Here,are the variables that the boto library uses to connect to AWS.
+    Variable name               Description
+  ------------------	     -----------------------
+  AWS_ACCESS_KEY   ----------->This is the access key for valid IAM account
+  AWS_SECRET_KEY   ----------->This is the secret key corresponding to the access key above
+  AW_REGION        ----------->This is the default region to use unless overridden.
+
+ ex:
+   export AWS_ACCESS_KEY="AKIAIOSFODNN7EXAMPLE"
+   export AWS_SECRET_KEY="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+   export AWS_REGION="us-east-1"
+--> create the aws instance using playbook
+   
+   ---
+   - name: Setup an EC2 instance
+   hosts: localhost
+   connection: local
+   tasks:
+   - name: Create an EC2 machine
+   ec2:
+   key_name: daniel-keypair
+   instance_type: t2.micro
+   image: ami-b66ed3de
+   wait: yes
+   group: webserver
+   vpc_subnet_id: subnet-59483
+   assign_public_ip: yes
+   register: newmachines
+   - name: Wait for SSH to start
+   wait_for:
+   host: "{{ newmachines.instances[0].public_ip }}"
+   port: 22
+   timeout: 300
+   delegate_to: localhost
+   - name: Add the machine to the inventory
+   add_host:
+   hostname: "{{ newmachines.instances[0].public_ip }}"
+   groupname: new
+   - name: Configure the new machines
+   hosts: new
+   sudo: yes
+   tasks:
+   - name: Install a MOTD
+   template:
+   src: motd.j2
+   dest: /etc/motd
+---------------------------------------
+

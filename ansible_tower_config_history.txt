@@ -1,0 +1,119 @@
+    1  yum repolist
+    2  yum install ansible
+    5  rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    8  rpm -qa | grep ansible
+    9  rpm -ql | grep ansible
+   10  rpm -ql | grep ansible-2.7.7-1.el7.noarch
+   11  useradd -d /home/ansadm -m ansadm
+   12  passwd ansadm
+   13  passwd -x -l ansadm
+   14  passwd root
+   19  su - ansadm
+   21  chown -R ansadm:ansadm /etc/ansible/
+   22  ls -l /etc/ansible/
+   23  su - ansadm
+   24  exit
+   25  su - ansadm
+   26  yum install boto
+   27  ansible-version
+   28  ansible --version
+   29  yum install -y python python-dev python-pip
+   30  pip install boto
+   31  python
+   32  histroy
+   33  rpm -qa | grep boto
+   34  ls -a
+   35  ls -l .ssh
+   36  cat /etc/host
+   37  cat /etc/hosts
+   38  vi /etc/hosts
+   39  su - ansadm
+   40  vi /etc/hosts
+   41  su - ansadm
+   42  cat /etc/hosts
+   43  su - ansadm
+   44  cat /etc/hosts
+   45  ls -l /etc/hosts
+   46  chown ansadm:ansadm /etc/hosts
+   47  chmod 700 /etc/hosts
+   48  ls -l /etc/hosts
+   49  su - ansadm
+   50  yum install boto3
+   51  yum install -y python python-dev python-pip
+   52  su - ansadm
+   53  curl https://bootstrap.pypa.io/ez_setup.py | python
+   54  pip install boto
+   55  pip install --upgrade pip
+   56  pip install boto3
+   57  su - ansadm
+   58  cat /home/ansadm/.ssh/id_rsa.pub
+   59  su - ansadm
+   60  exit
+   61  su asadm
+   62  su ansadm
+   63  exit
+   64  su - ansadm
+   65  yum install -y python2-winrm
+   66  su - ansadm
+   67  exit
+   68  apt-get install python-pip
+   69  yum install python-pip
+   70  pip install pywinrm
+   71  pip install --upgrade pip
+   72  pip install pywinrm
+   73  ansible --version
+   74  su - ansadm
+   89  yum -y install python36u-pip
+   90  pip3.6 install numpy
+   91  yum -y install python36u-devel
+   110  yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+  111  yum -y install python36u
+  112  python3.6 -V
+  113  where python3
+  114  whereis python3
+  115  which python3
+  116  su - ansadm
+  117  exit
+  118  su - ansadm
+  119  exit
+  120  yum intall w3m
+  121  yum install w3m
+  122  su - ansadm
+  123  exit
+  124  python --versin
+  125  python --version
+  126  pip install ansible-cmdb
+  127  clear
+  128  yum update
+  146  yum install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  147  curl -k -O https://releases.ansible.com/awx/setup/ansible-tower-setup-latest.tar.gz
+  148  ls
+  149  tar xvf ansible-tower-setup-latest.tar
+  150  tar xvf ansible-tower-setup-latest.tar.gz
+  151  gunzip ansible-tower-setup-latest.tar.gz
+  152  ls
+  153  rm -rf ansible-tower-setup-latest.tar.gz
+  154  http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  155  yum install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  156  wget http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-3.1.5.tar.gz
+  157  yum install wget
+  158  wget http://releases.ansible.com/ansible-tower/setup/ansible-tower-setup-3.1.5.tar.gz
+  159  ls
+  160  tar -xzvf ansible-tower-setup-3.1.5.tar.gz
+  161  ls
+  162  cd ansible-tower-setup-3.1.5
+  163  ls
+  164  cat inventory
+  165  ./setup.sh
+  166  ls
+  167  cat install.yml
+  168  ls
+  169  rm -rf ansible-tower-setup-3.1.5
+  170  rm -rf ansible-tower-setup-3.1.5.tar.gz
+  171  su - ansadm
+  172  ls
+  173  ls -a
+  174  cd f~/.boto
+  175  grep boto
+  176  cd ~/.boto
+
