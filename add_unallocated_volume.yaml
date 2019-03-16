@@ -1,0 +1,7 @@
+---
+- hosts: windows2
+  gather_facts: no
+  tasks:
+    - name: add unallocatedd volumes
+      parted: device=/dev/xvdf unit=GiB
+      register: info

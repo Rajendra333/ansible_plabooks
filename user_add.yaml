@@ -1,0 +1,17 @@
+---
+- hosts: windows2
+  tasks:
+  - name: Domain User
+    win_domain_user:
+      name: bob
+      upn: bob@ansible.com
+      password: password@123
+      state: present
+      ou: OU=windows,DC=ansible DC=com
+      account_enabled: true
+      fullname: bob jones
+      description: Normal user
+      user_cannot_change_password: no
+      password_never_expires: yes
+      groups: serveradmin
+      groups_action: add

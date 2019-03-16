@@ -1,0 +1,17 @@
+---
+- hosts: windows2
+  gather_facts: no
+  tasks:
+    - name: creation
+      win_partition:
+         drive_letter: D
+         partition_size: 10 GiB
+         disk_number: 1
+      register: info
+    - name: resize
+      win_partition:
+         drive_letter: E
+         partition_size: -1
+         partition_number: 1
+         disk_number: 1
+      register: nefw

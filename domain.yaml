@@ -1,0 +1,13 @@
+---
+- hosts: windows
+  gather_facts: no
+  tasks:
+    - name : create a domain
+      win_domain_controller:
+        dns_domain_name: ansible.com
+        domain_admin_user: admin@ansible.com
+        domain_admin_password: server@12345
+        safe_mode_password: server@12345
+        state: domain_controller
+        log_path: C:\ansible_win_domain_controller.txt
+      register: domain_result

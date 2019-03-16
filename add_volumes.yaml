@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_prompt:
+    - name: instances
+      prompt: Give instnace_id
+      private: no
+    - name: volume
+      prompt: Give Volume_size
+      private: no
+  tasks:
+    - name: add volume 
+      ec2_vol:
+        instance: "{{ instances }}"
+        region: us-east-2
+        volume_size: "{{ volume }}"
+        volume_type: gp2
+        device_name: /dev/xvdf
+      register: vol

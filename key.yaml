@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+ 
+      - name: Create a new EC2 key
+        ec2_key:
+            name: newone
+            region: us-east-2
+        register: ec2_key_result

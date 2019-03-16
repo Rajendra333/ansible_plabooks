@@ -1,0 +1,46 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Setting up Security/Firewall Group
+      ec2_group:
+         name: MY_AWS_Security_Grp
+         description: Rules Allowing Traffic on port 22 and 80
+         region: us-east-2
+         rules:
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+         rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+
+    - name: Provision a EC2 Instance
+      ec2:
+         key_name: New_Key
+         region: us-east-2
+         instance_type: t2.micro
+         image: ami-08b4a0f6e106c1dba
+         wait: yes
+         wait_timeout: 500
+         count: 1
+         instance_tags:
+           Name: Aws_instances
+           Owner: LTI
+         volumes:
+          - device_name: /dev/xvdb
+            volume_type: gp2
+            volume_size: 2
+         monitoring: no
+         vpc_subnet_id: subnet-6253932e
+         assign_public_ip: yes
+         group: MY_AWS_Security_Grp
+      register: ec2_out
+
+

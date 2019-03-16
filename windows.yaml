@@ -1,0 +1,47 @@
+---
+- hosts: localhost
+  gather_facts: False
+  connection: local
+  vars_prompt:
+    - name: image
+      prompt: enter image_id
+      private: no
+  vars:
+    keypair: aws
+    instance_type: t2.micro
+    security_group: MY_AWS_Security_Grp
+    region: us-east-2
+    vpc: subnet-41920a3b
+    amount: 1
+    tagname2: windows
+  tasks:
+    - name: Launch instance
+      ec2:
+         key_name: "{{ keypair }}"
+         group: "{{ security_group }}"
+         instance_type: "{{ instance_type }}"
+         instance_tags:
+           Name: "{{ tagname2 }}"
+         image: "{{ image }}"
+         state: present
+         wait: true
+         region: "{{ region }}"
+         vpc_subnet_id: "{{ vpc }}"
+         assign_public_ip: yes
+         count: "{{ amount }}"
+         count_tag: Name
+      register: ec2
+    - name: Add new instance to host group
+      add_host: hostname="{{ item.public_ip }}" groupname=windows
+      with_items: '{{ec2.instances}}'
+    - name: Get the win password
+      ec2_win_password:
+           profile: dev
+           instance_id: "{{ item.id }}"
+           region: "{{ region }}"
+           key_file: "~/.ssh/aws.pem"
+           wait: yes
+           wait_timeout: 120
+      with_items:
+           - "{{ ec2.tagged_instances }}"
+      register: password

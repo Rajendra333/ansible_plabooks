@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  vars_prompt:
+    - name: volume_id
+      prompt: give volume_id
+      private: no
+  tasks:
+    - name: Detach volume
+      ec2_vol:
+        id: "{{ volume_id }}"
+        region: us-east-2
+        instance: None
+    - name: delete volume
+      ec2_vol:
+        id: "{{ volume_id }}"
+        region: us-east-2
+        state: absent
+      register: del

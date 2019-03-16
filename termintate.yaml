@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  vars_prompt:
+    - name: image_id
+      prompt: Give image_id for terminate
+      private: no 
+  tasks:
+    - name: terminatate  instance
+      ec2:
+        state='absent'
+        region=us-east-2
+        instance_ids={{ image_id }}
