@@ -53,8 +53,8 @@ pip install boto3
 vim ~/.boto
 [default]
 aws_access_key_id = AKIAIPXY65WY35LVIFUQ
-aws_secret_access_key = 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
+aws_secret_access_key = xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
-aws_secret_access_key = 2XcJQLTguv+WHVXI+mviMNsediUHV4+n7OCVPxCh
+aws_secret_access_key = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
