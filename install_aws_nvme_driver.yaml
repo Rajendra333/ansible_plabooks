@@ -1,0 +1,21 @@
+---
+- hosts: windows2012
+  gather_facts: no
+  connection: local
+  tasks:
+    - name: download nvme zip file
+      win_get_url:
+        url: https://s3.amazonaws.com/ec2-windows-drivers-downloads/NVMe/Latest/AWSNVMe.zip
+        dest: C:\Users\Administrator\Documents
+      register: info
+    - name: unzip file
+      win_unzip:
+        src: C:\Users\Administrator\Documents\AWSNVMe.zip
+        dest: C:\Users\Administrator\Documents\AWSNVMe\
+        delete_archive: yes
+      register: out
+    - name: install Nvme driver
+      win_command: powershell.exe "C:\Users\Administrator\Documents\AWSNVMe/install.ps1"
+      register: nvme
+    - name: reboot the system
+      win_reboot:
