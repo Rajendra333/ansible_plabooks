@@ -50,6 +50,8 @@ pip install boto
 
 pip install boto3
 
+yum install python2-winrm
+
 vim ~/.boto
 [default]
 aws_access_key_id = AKIAIPXY65WY35LVIFUQ
