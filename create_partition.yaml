@@ -1,0 +1,8 @@
+---
+- hosts: windows
+  gather_facts: no
+  connection: local
+  tasks: 
+    - name: create partion
+      win_command: powershell.exe "Get-Disk|Where partitionstyle -eq 'raw'|Initialize-Disk -PartitionStyle MBR -PassThru|New-Partition -AssignDriveLetter -UseMaximumSize|Format-Volume -FileSystem NTFS -NewFileSystemLabel "ephemeral" -Confirm:$false"
+      register: info
