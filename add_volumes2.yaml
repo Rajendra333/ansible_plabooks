@@ -6,9 +6,7 @@
     - name: add volume 
       ec2_vol:
         instance: i-005175710c5516a20
-        region: us-east-2
-        aws_access_key_id = AKIAING7UQ2EQXYCSC5Q
-        aws_secret_access_key = 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        
+        region: us-east-2              
         volume_size: 20
         volume_type: gp2
         device_name: /dev/xvdf
