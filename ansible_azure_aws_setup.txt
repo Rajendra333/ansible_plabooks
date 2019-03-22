@@ -54,7 +54,7 @@ yum install python2-winrm
 
 vim ~/.boto
 [default]
-aws_access_key_id = AKIAIPXY65WY35LVIFUQ
+aws_access_key_id = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 aws_secret_access_key = xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
