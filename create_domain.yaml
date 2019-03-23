@@ -1,0 +1,15 @@
+---
+- hosts: windows
+  gather_facts: no
+  connection: local
+  tasks: 
+    - name: Add computer to Active Directory 
+      win_domain_computer:
+        name: ansible.com
+        sam_account_name: windows_server
+        dns_hostname: ansible.com
+        ou: "OU=servers,DC=ansible,DC=com"
+        description: Example of window server
+        enabled: yes
+        state: present
+      delegate_to: ansible.com

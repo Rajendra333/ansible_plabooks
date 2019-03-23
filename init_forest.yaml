@@ -1,0 +1,26 @@
+---
+- hosts: windows
+  gather_facts: no
+  connection: local
+  vars:
+    ad_domain_name: ansible.com
+    ad_safe_mode_password: server@123
+  tasks:
+    - name: Initialise Forest
+      win_domain:
+        dns_domain_name: "{{ ad_domain_name }}"
+        safe_mode_password: "{{ ad_safe_mode_password }}"
+      register: create_forest_result
+    - name: Collect computer name result
+      debug:
+        msg: "{{ create_forest_result }}"
+
+    - name: Reboot after forest creation
+      win_reboot:
+        connect_timeout: 15
+        post_reboot_delay: 15
+        reboot_timeout: 200
+      when: create_forest_result.reboot_required
+    - name: Wait for system to become reachable over WinRM
+      wait_for_connection:
+        timeout: 900

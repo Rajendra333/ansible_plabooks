@@ -1,0 +1,59 @@
+---
+- hosts: windows
+  gather_facts: no
+  connection: local
+  vars:
+    ad_domain_name: ansible.com
+    ad_safe_mode_password: server@123
+  tasks:
+    - name: Install AD-Domain-Services feature
+      win_feature:
+        name: AD-Domain-Services
+        include_management_tools: true
+        include_sub_features: true
+        state: present
+      register: adds_result
+    - name: Collect ADDS provision result
+      debug:
+        msg: "{{adds_result}}"
+    - name : pause for 10 seconds before provisioning another feature
+      pause:
+        seconds: 10
+    - name: Install DNS SubFeature
+      win_feature:
+        name: DNS
+        include_sub_features: true
+        include_management_tools: true
+        state: present
+      register: dns_result
+    - name: Collect dns provision result
+      debug:
+        msg: "{{dns_result}}"
+    - name: Reboot after ADDS configuration
+      win_reboot:
+        connect_timeout: 15
+        post_reboot_delay: 15
+      when: adds_result.reboot_required
+
+    - name: Wait for system to become reachable over WinRM
+      wait_for_connection:
+        timeout: 900
+    - name: Initialise Forest
+      win_domain:
+        dns_domain_name: "{{ ad_domain_name }}"
+        safe_mode_password: "{{ ad_safe_mode_password }}"
+      register: create_forest_result
+    - name: Collect computer name result
+      debug:
+        msg: "{{ create_forest_result }}"
+
+    - name: Reboot after forest creation
+      win_reboot:
+        connect_timeout: 15
+        post_reboot_delay: 15
+        reboot_timeout: 200
+      when: create_forest_result.reboot_required
+    - name: Wait for system to become reachable over WinRM
+      wait_for_connection:
+        timeout: 900
+

@@ -1,0 +1,23 @@
+---
+- hosts: windows
+  gather_facts: no
+  connection: local
+  tasks:
+    - name: Promote to domain controller
+      win_domain_controller:
+        dns_domain_name: ansible.com
+        domain_admin_user: admin@ansible.com
+        domain_admin__password: Server12345!
+        safe_mode_password: Server12345!
+        state: domain_controller
+        log_path: C:\ansible_win_domain_controller.txt
+      register: result
+
+    - name: Reboot upon promotion
+      raw: shutdown /r
+      when: result|changed
+      async: 0
+      poll: 0
+      ignore_errors: true
+
+

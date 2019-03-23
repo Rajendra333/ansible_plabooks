@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: add volume
+      ec2_vol:
+        instance: i-005175710c5516a20
+        region: us-east-2
+        volume_size: 20
+        volume_type: gp2
+        device_name: /dev/xvdf
+      register: vol
+

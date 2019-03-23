@@ -1,0 +1,25 @@
+---
+- hosts: windows
+  gather_facts: no
+  connection: local
+  tasks:
+    - name: Install DNS SubFeature
+      win_feature:
+        name: DNS
+        include_sub_features: true
+        include_management_tools: true
+        state: present
+      register: dns_result
+    - name: Collect dns provision result
+      debug:
+        msg: "{{dns_result}}"
+    - name: Reboot after ADDS configuration
+      win_reboot:
+        connect_timeout: 15
+        post_reboot_delay: 15
+      when: adds_result.reboot_required
+
+    - name: Wait for system to become reachable over WinRM
+      wait_for_connection:
+        timeout: 900
+
