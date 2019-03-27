@@ -1,0 +1,22 @@
+---
+- hosts: windows1
+  gather_facts: no
+  connection: local
+  vars_prompt:
+    - name: log_name
+      prompt: enter log_name
+      private: no
+    - name: a_date
+      prompt: enter after_date(dd/mm/yyyy)
+      private: no
+    - name: b_date
+      prompt: enter before_date(dd/mm/yyyy)
+      private: no
+    - name: entry_type
+      prompt: enter entry_type
+      private: no
+  tasks: 
+    - name: script
+      win_shell: |
+         Get-EventLog  -LogName "{{log_name}}" -After "{{a_date}}" -Before "{{b_date}}" -EntryType "{{entry_type}}" | Export-CSV -Path C:\logfile.csv -NoTypeInformation -Append
+      register: info

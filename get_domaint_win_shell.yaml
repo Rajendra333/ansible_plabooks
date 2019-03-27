@@ -1,0 +1,38 @@
+---
+- hosts: windows1
+  gather_facts: yes
+  connection: local
+  vars:
+    host: "{{ ansible_hostname }}"
+  tasks:
+    - name: Generate domain details report
+      win_shell: |
+        $data = (Get-WmiObject Win32_ComputerSystem).Domain
+        if ( $data -eq 'ansible.com' ) {
+        $Hostname = $env:computername
+        $csvContents = @()
+        $row = New-Object System.Object
+        $row | Add-Member -MemberType NoteProperty -Name "Hostname" -Value $Hostname
+        $row | Add-Member -MemberType NoteProperty -Name "Domain" -Value $data
+        $row | Add-Member -MemberType NoteProperty -Name "status" -Value "true"
+        $csvContents += $row
+        $csvContents | Export-CSV -Path C:\Hostname_$Hostname.csv -NoTypeInformation -Append
+        }
+        else
+        {
+        $Hostname = $env:computername
+        $csvContents = @()
+        $row = New-Object System.Object
+        $row | Add-Member -MemberType NoteProperty -Name "Hostname" -Value $Hostname
+        $row | Add-Member -MemberType NoteProperty -Name "Domain" -Value $data
+        $row | Add-Member -MemberType NoteProperty -Name "status" -Value "false"
+        $csvContents += $row
+        $csvContents | Export-CSV -Path C:\Hostname_$Hostname.csv -NoTypeInformation -Append
+        }
+    - name: Fetch report file to managed node
+      fetch:
+        src: C:\
+        dest: /root/ansible/prefix-Hostname
+        flate: yes
+        fail_on_missing: false
+        ignore_errors: true
