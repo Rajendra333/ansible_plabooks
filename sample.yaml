@@ -1,0 +1,38 @@
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  any_errors_fatal: true
+  vars_prompt:
+    - name: Name
+      prompt: enter name
+      private: no
+    - name: After_Date
+      prompt: enter After Date(dd/mm/yy)
+      private: no
+    - name: Before_Date
+      prompt: enter Before Date(dd/mm/yy)
+      private: no
+  tasks:
+    - name: Read input values
+      set_fact:
+        name1: "{{Name}}"
+        Adate: "{{After_Date}}"
+        Bdate: "{{Before_Date}}"
+    - name: validate log_names
+      fail: 
+        msg: enter correct name
+      when: 
+        - name1 != "lakshman"
+        - name1 != "ram"
+        - name1 != "siva"
+    - name: validate after_dates
+      fail:
+        msg: enter date after 9/03/19
+      when:
+        - Adate < "10/03/19"
+    - name: validate Before_dates
+      fail:
+        msg: enter date before today's date
+      when:
+        - Bdate > "{{lookup('pipe','date +%d/%m/%y')}}"

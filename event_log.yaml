@@ -1,0 +1,67 @@
+---
+- hosts: windows1
+  connection: local
+  gather_facts: yes
+  any_errors_fatal: true
+  vars_prompt:
+    - name: log_name
+      prompt: enter log_name
+      private: no
+    - name: After_Date
+      prompt: enter After Date(mm/dd/yy)
+      private: no
+    - name: Before_Date
+      prompt: enter Before Date(mm/dd/yy)
+      private: no
+    - name: entry_type
+      prompt: enter entry_type
+      private: no
+
+  tasks:
+    - name: Read input values
+      set_fact:
+        name1: "{{log_name}}"
+        Adate: "{{After_Date}}"
+        Bdate: "{{Before_Date}}"
+        type: "{{entry_type}}"
+    - name: validate log_names
+      fail:
+        msg: enter correct log_name(system/application)
+      when:
+        - name1 != "system"
+        - name1 != "application"
+    - name: validate after_dates
+      fail:
+        msg: enter the date after(03/09/19)
+      when:
+        - Adate < "03/10/19"
+    - name: validate Before_dates
+      fail:
+        msg: enter the date before today's date
+      when:
+        - Bdate > "{{lookup('pipe','date +%m/%d/%y')}}"
+    - name: validate entry_type
+      fail:
+        msg: enter correct entry_type(information/error/Warning)
+      when:
+        - type != "information"
+        - type != "error"
+        - type != "Warning"
+    - name: script
+      win_shell: |
+         Get-EventLog  -LogName "{{name1}}" -After "{{Adate}}" -Before "{{Bdate}}" -EntryType "{{type}}" | Export-CSV -Path C:\logfile.csv -NoTypeInformation -Append
+      register: info
+    - name: save powershell Script actions
+      file:
+        path: "/var/log/powershellscript_{{ inventory_hostname }}"
+        state: touch
+      delegate_to: localhost
+    - debug:
+        msg: "{{info}}"
+    - local_action: lineinfile line="{{ info.cmd }}" dest=/var/log/powershellscript_{{ inventory_hostname }}
+    - name: fetch output file to local machine
+      fetch:
+        src: C:\logfile.csv
+        dest: /root/ansible/logfile_{{ ansible_env.COMPUTERNAME }}
+        flat: yes
+

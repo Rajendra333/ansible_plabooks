@@ -1,0 +1,15 @@
+---
+- hosts: windows1
+  gather_facts: yes
+  tasks: 
+    - name: checking domain having or no
+      win_command: powershell.exe "Get-ADDomainController -Discover -Site "Default-First-Site-Name | export-csv -Path C:\Users\Administrator\Documents\result1.csv -NoTypeInformation""
+      register: domain_result
+    - name: domain
+      debug: 
+        msg: "{{domain_result}}"
+    - name: fetch result_file
+      fetch: 
+        src: C:\Users\Administrator\Documents\result1.csv 
+        dest: ~/ansible/result_{{ inventory_hostname }}
+        flat: yes

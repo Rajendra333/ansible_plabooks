@@ -1,0 +1,11 @@
+---
+- hosts: windows1
+  gather_facts: no
+  tasks:
+    - name: check the domain 
+      raw: powershell.exe -C "Get-AdDomain | select -ExpandProperty DNSRoot"
+      register: result
+      ignore_errors: yes
+    - name:  result
+      debug:
+        var: result.stdout

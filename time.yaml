@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  vars_prompt:
+    - name: data
+      prompt: enter date
+      private: no
+  tasks:
+    - set_fact: mydate="{{lookup('pipe','{{data}} +%d/%m/%y')}}"
+    - debug: var=mydate

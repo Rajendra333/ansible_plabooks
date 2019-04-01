@@ -1,0 +1,26 @@
+---
+- hosts: windows2
+  gather_facts: no
+  connection: local
+  tasks:
+    - name: copy powershell script
+      win_copy:
+        src: /root/domain1.ps1
+        dest: C:\Users\Administrator\Documents\ 
+    - name: execution powershell script
+      raw: powershell.exe -ExecutionPolicy ByPass -File "C:\Users\Administrator\Documents\domain1.ps1"
+      register: info
+    - name: get csv files
+      fetch:
+        src: C:\user_*.txt 
+        dest: /root/ansible/
+        flat: yes
+        validate_checksum: false
+    - name: delete files
+      file:
+        path: C:\user_*.txt
+        state: absent
+    - name: generate a report
+      command: cp user_*.txt > /root/ansible/sample/ chdir=/root/ansible/
+      delegate_to: localhost
+   
