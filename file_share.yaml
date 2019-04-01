@@ -1,0 +1,22 @@
+---
+- hosts: windows1
+  gather_facts: no
+  connection: local
+  vars_prompt:
+    - name: filename
+      prompt: enther folder name
+      private: no
+    - name: path
+      prompt: enter path 
+      private: no
+    - name: user
+      prompt: enter user name(domainname/username)
+      private: no
+   
+    - name: user
+      prompt: enter user name(domainname/username)
+      private: no
+  tasks: 
+    - name: powershell script
+      win_shell: |
+        New-SMBShare –Name "{{filename}}" –Path "{{path}}" -ReadAccess {{user}} 

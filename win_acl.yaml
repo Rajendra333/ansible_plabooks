@@ -1,0 +1,29 @@
+---
+- hosts: windows1
+  gather_facts: no
+  connection: local
+  vars_prompt:
+    - name: path
+      prompt: enther directory name with path
+      private: no
+    - name: username
+      prompt: enter user name (domain\username)
+      private: no
+    - name: rights
+      prompt: enter permission type(Read/Write/Modify/FullControl/Delete)
+      private: no
+    - name: type
+      prompt: enter type(allow/deny)
+      private: no
+    - name: state
+      prompt: enter state(present for grant/ absent for remove)
+      private: no
+  tasks:
+    - name: grant permision
+      win_acl:
+        path: "{{path}}"
+        user: "{{username}}"
+        rights: "{{rights}}"
+        type: "{{type}}"
+        state: "{{state}}" 
+      register: info
