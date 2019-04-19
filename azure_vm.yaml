@@ -24,8 +24,7 @@
   - name: create Azure resource group
     azure_rm_resourcegroup:
       name: "{{ resource_group }}"
-      location: '{{ location }}'
-      state: present
+      location: "{{ location }}"
 
   - name: create Azure virtual network in resource group
     azure_rm_virtualnetwork:
