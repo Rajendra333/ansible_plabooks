@@ -112,7 +112,7 @@
 
          try
          {
-         $GetEventLogs = Get-EventLog -ComputerName {{ HostName }} -LogName {{ LogName }} -EntryType {{ LogType }} -Before (Get-Date).AddDays({{ Days }})
+         $GetEventLogs = Get-EventLog -ComputerName {{ HostName }} -LogName {{ LogName }} -EntryType {{ LogType }} -After (Get-Date).AddDays({{ Days }})
 
          foreach($Event in $GetEventLogs)
          {
