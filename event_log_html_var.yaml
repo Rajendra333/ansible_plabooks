@@ -1,0 +1,143 @@
+---
+- name: Get Windows EventLog Details
+  hosts: windows1
+  gather_facts: no
+
+  vars:
+     HostName: "{{ HostName }}"
+     ServiceName: "{{ ServiceName }}"
+     LogName: "{{ LogName }}"
+     LogType: "{{ LogType }}"
+     Days: "{{ Days }}"
+
+  tasks:
+    - name: Get Windows EvetLog
+      win_shell: |
+
+         $RDate = (Get-Date).ToString("dd-M-yyyy")
+         $outReportFile = "EventLog_Report_{{ HostName }}_$RDate.htm"
+         $outPath = "C:\/"
+
+         $OutputFileName= $outPath + $outReportFile
+         $FileCreate= New-Item -ItemType file $OutputFileName -Force
+
+         Function writeHtmlHeader
+         {
+         param($fileName)
+         $date = ( get-date ).ToString('dd/MM/yyyy')
+         Add-Content $fileName "<html>"
+         Add-Content $fileName "<head>"
+         Add-Content $fileName "<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>"
+         Add-Content $fileName '<title>Event Log Report</title>'
+         add-content $fileName '<STYLE TYPE="text/css">'
+         add-content $fileName  "<!--"
+         add-content $fileName  "td {"
+         add-content $fileName  "font-family: Tahoma;"
+         add-content $fileName  "font-size: 11px;"
+         add-content $fileName  "border-top: 1px solid #999999;"
+         add-content $fileName  "border-right: 1px solid #999999;"
+         add-content $fileName  "border-bottom: 1px solid #999999;"
+         add-content $fileName  "border-left: 1px solid #999999;"
+         add-content $fileName  "padding-top: 0px;"
+         add-content $fileName  "padding-right: 0px;"
+         add-content $fileName  "padding-bottom: 0px;"
+         add-content $fileName  "padding-left: 0px;"
+         add-content $fileName  "}"
+         add-content $fileName  "body {"
+         add-content $fileName  "margin-left: 5px;"
+         add-content $fileName  "margin-top: 5px;"
+         add-content $fileName  "margin-right: 0px;"
+         add-content $fileName  "margin-bottom: 10px;"
+         add-content $fileName  ""
+         add-content $fileName  "table {"
+         add-content $fileName  "border: thin solid #000000;"
+         add-content $fileName  "}"
+         add-content $fileName  "-->"
+         add-content $fileName  "</style>"
+         Add-Content $fileName "</head>"
+         Add-Content $fileName "<body>"
+
+         add-content $fileName  "<table width='100%'>"
+         add-content $fileName  "<tr bgcolor='#CCCCCC'>"
+         add-content $fileName  "<td colspan='4' height='25' align='center'>"
+         add-content $fileName  "<font face='tahoma' color='#003399' size='6'><strong>I&OS Server EventLog Report - {{ HostName }} - $date </strong></font>"
+         add-content $fileName  "</td>"
+         add-content $fileName  "</tr>"
+         add-content $fileName  "</table>"
+
+         }
+
+         Function writeSystemInfoHeader
+         {
+         param($fileName)
+
+         Add-Content $fileName "<table width='100%'><tbody>"
+         Add-Content $OutputFileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $OutputFileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $OutputFileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $OutputFileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $fileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $fileName "<td width='100%' align='center' colSpan=6><font face='tahoma' color='#003399' size='3'><strong> Server EventLog Report </strong></font></td>"
+         Add-Content $fileName "</tr>"
+
+         Add-Content $fileName "<tr bgcolor=#CCCCCC>"
+         Add-Content $fileName "<td width='20%' align='center'><b>Event ID</b></td>"
+         Add-Content $fileName "<td width='20%' align='center'><b>Time Generated</b></td>"
+         Add-Content $fileName "<td width='20%' align='center'><b>Entry Type</b></td>"
+         Add-Content $fileName "<td width='20%' align='center'><b>Soruce</b></td>"
+         Add-Content $fileName "<td width='20%' align='center'><b>Message</b></td>"
+         Add-Content $fileName "<td width='20%' align='center'><b>User</b></td>"
+         Add-Content $fileName "</tr>"
+         }
+
+
+         Function writeSystemInfo
+         {
+         param($filename,$eventid,$time,$entrytype,$source,$message,$user)
+
+         Add-Content $fileName "<tr>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$eventid</td>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$time</td>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$entrytype</td>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$source</td>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$message</td>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$user</td>"
+         Add-Content $fileName "</tr>"
+         }
+
+         writeHtmlHeader $OutputFileName
+
+         writeSystemInfoHeader $OutputFileName
+
+
+         try
+         {
+         $GetEventLogs = Get-EventLog -ComputerName {{ HostName }} -LogName {{ LogName }} -EntryType {{ LogType }} -Before (Get-Date).AddDays({{ Days }})
+
+         foreach($Event in $GetEventLogs)
+         {
+         $EventID = $Event.EventID
+         $Time = $Event.TimeGenerated
+         $LogType = $Event.EntryType
+         $Source =$Event.Source
+         $Message = $Event.Message
+         $User = $Event.UserName
+
+         writeSystemInfo $OutputFileName $EventID $Time $LogType $Source $Message $User
+
+         }
+
+         Write-Output "#@#RESULT#@#SUCCESS#@#"
+         }
+         catch
+         {
+         $ErrorMessage = $_.Exception.Message
+         $ErrorMessage
+         Write-Output "#@#RESULT#@#FAILED#@#"
+         }
+      register: event_log_result
+
+    - name : Displaying Output
+      debug:
+         var: event_log_result.stdout_lines
+
