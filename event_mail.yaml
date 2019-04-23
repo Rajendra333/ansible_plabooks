@@ -135,28 +135,20 @@
          $ErrorMessage
          Write-Output "#@#RESULT#@#FAILED#@#"
          }
-		 Function sendEmail  
+	 Function sendEmail  
          { 
          param($from,$to,$subject,$smtphost,$mailBody)  
-        [string]$recipients="$to"
+         [string]$recipients="$to"
     
         $body=$mailBody
         $mailServer = New-Object System.Net.Mail.MailMessage $from, $recipients, $subject, $body
         $mailServer.isBodyhtml = $true
         $smtp = new-object Net.Mail.SmtpClient($smtphost)
         $smtp.send($mailServer)
-        } 
- 
- 
-
-        $body = "Hi<br><br>The admin access of $userCAI on $vmName has been <b>revoked Successfully</b>.<br><br><b>Regards,</b><br><b>PCO Automation </b><br><font color='red'><b>This is a system generated email. Please DO NOT REPLY to this notification</font></b>"
-                
-        $subject = "$incidentNumber Admin Access Revoked successfully - $userCAI"
-                    
-
+        }
+        $body = "Hi<br><br>The admin access of $userCAI on $vmName has been <b>revoked Successfully</b>.<br><br><b>Regards,</b><br><b>PCO Automation </b><br><font color='red'><b>This is a system generated email. Please DO NOT REPLY to this notification</font></b>" 
+        $subject = "$incidentNumber Admin Access Revoked successfully - $userCAI              
         sendEmail -from ketanjain@chevron.com -to ketanjain@chevron.com -subject test -smtphost mailhost-chvpk.chevrontexaco.net -mailBody $body 
-
-
       register: event_log_result
 
     - name : Displaying Output
