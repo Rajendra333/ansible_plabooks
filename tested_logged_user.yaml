@@ -1,9 +1,10 @@
 ---
 - name: Get Cluster and node information
-  hosts: windows1
+  hosts: {{ Hosts }}
   gather_facts: yes
   vars:
     Servername: "{{ ansible_hostname }}"
+    Hosts: {{ machines }}
   tasks:
     - name: Get Cluster information
       win_shell: |
