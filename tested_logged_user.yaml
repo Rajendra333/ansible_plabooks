@@ -1,0 +1,137 @@
+---
+- name: Get Cluster and node information
+  hosts: windows1
+  gather_facts: yes
+  vars:
+    Servername: "{{ ansible_hostname }}"
+  tasks:
+    - name: Get Cluster information
+      win_shell: |
+
+         $RDate = (Get-Date).ToString("dd-M-yyyy")
+         $outReportFile = "Logged__info_$RDate.htm"
+         $outPath = "C:\/"
+
+         $OutputFileName= $outPath + $outReportFile
+         $FileCreate= New-Item -ItemType file $OutputFileName -Force
+
+         Function writeHtmlHeader
+         {
+         param($fileName)
+         $date = ( get-date ).ToString('dd/MM/yyyy')
+         Add-Content $fileName "<html>"
+         Add-Content $fileName "<head>"
+         Add-Content $fileName "<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>"
+         Add-Content $fileName '<title>Event Log Report</title>'
+         add-content $fileName '<STYLE TYPE="text/css">'
+         add-content $fileName  "<!--"
+         add-content $fileName  "td {"
+         add-content $fileName  "font-family: Tahoma;"
+         add-content $fileName  "font-size: 11px;"
+         add-content $fileName  "border-top: 1px solid #999999;"
+         add-content $fileName  "border-right: 1px solid #999999;"
+         add-content $fileName  "border-bottom: 1px solid #999999;"
+         add-content $fileName  "border-left: 1px solid #999999;"
+         add-content $fileName  "padding-top: 0px;"
+         add-content $fileName  "padding-right: 0px;"
+         add-content $fileName  "padding-bottom: 0px;"
+         add-content $fileName  "padding-left: 0px;"
+         add-content $fileName  "}"
+         add-content $fileName  "body {"
+         add-content $fileName  "margin-left: 5px;"
+         add-content $fileName  "margin-top: 5px;"
+         add-content $fileName  "margin-right: 0px;"
+         add-content $fileName  "margin-bottom: 10px;"
+         add-content $fileName  ""
+         add-content $fileName  "table {"
+         add-content $fileName  "border: thin solid #000000;"
+         add-content $fileName  "}"
+         add-content $fileName  "-->"
+         add-content $fileName  "</style>"
+         Add-Content $fileName "</head>"
+         Add-Content $fileName "<body>"
+
+         add-content $fileName  "<table width='100%'>"
+         add-content $fileName  "<tr bgcolor='#CCCCCC'>"
+         add-content $fileName  "<td colspan='4' height='25' align='center'>"
+         add-content $fileName  "<font face='tahoma' color='#003399' size='6'><strong>Cluster Information and Node Statu- $date </strong></font>"
+         add-content $fileName  "</td>"
+         add-content $fileName  "</tr>"
+         add-content $fileName  "</table>"
+
+         }
+
+         Function writeSystemInfoHeader
+         {
+         param($fileName)
+
+         Add-Content $fileName "<table width='100%'><tbody>"
+         Add-Content $OutputFileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $OutputFileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $OutputFileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $OutputFileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $fileName "<tr bgcolor='#CCCCCC'>"
+         Add-Content $fileName "<td width='100%' align='center' colSpan=6><font face='tahoma' color='#003399' size='3'><strong> Server EventLog Report </strong></font></td>"
+         Add-Content $fileName "</tr>"
+
+         Add-Content $fileName "<tr bgcolor=#CCCCCC>"
+         Add-Content $fileName "<td width='20%' align='center'><b>Domain</b></td>"
+         Add-Content $fileName "<td width='20%' align='center'><b>User</b></td>"
+         Add-Content $fileName "<td width='20%' align='center'><b>Id</b></td>"
+         Add-Content $fileName "<td width='20%' align='center'><b>ServerName</b></td>"
+         Add-Content $fileName "</tr>"
+         }
+
+
+         Function writeSystemInfo
+         {
+         param($filename,$Domain,$User,$Id,$ServerName)
+
+         Add-Content $fileName "<tr>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$Domain</td>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$User</td>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$Id</td>"
+         Add-Content $fileName "<td bgcolor='#FFFFFF' align=left ><b>$Servername</td>"
+         Add-Content $fileName "</tr>"
+         }
+
+         writeHtmlHeader $OutputFileName
+
+         writeSystemInfoHeader $OutputFileName
+         $Servername = $env:computername
+         try
+         {
+         function Get-LoggedonUser
+         {
+         Get-WmiObject -Class Win32_LoggedOnUser -ComputerName  $Servername |
+         foreach   {
+            $ud = $_.Antecedent -split ","
+            $user = New-Object -TypeName PSObject -Property @{
+            Domain  = (($ud[0] -split "\.")[2] -split "=")[1] -replace '"', ''
+            User    = ($ud[1] -split "=")[1] -replace '"', ''
+            Id        = (($_.Dependent -split "\.")[2] -split "=")[1] -replace '"', ''
+                   }
+            $user.PSTypeNames[0] = "LoggedOnUser"
+            $user
+         writeSystemInfo $OutputFileName $user.Domain $user.User $user.Id $Servername
+         }
+
+                   }
+
+         Get-LoggedonUser
+         Write-Output "#@#RESULT#@#SUCCESS#@#"
+         }
+         catch
+         {
+         $ErrorMessage = $_.Exception.Message
+         $ErrorMessage
+         Write-Output "#@#RESULT#@#FAILED#@#"
+         }
+         
+
+      register: Cluster
+
+    - name : Displaying Output
+      debug:
+         var: Cluster.stdout_lines
+
