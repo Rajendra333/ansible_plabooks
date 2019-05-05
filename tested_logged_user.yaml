@@ -1,10 +1,10 @@
 ---
 - name: Get Cluster and node information
-  hosts: {{ Hosts }}
+  hosts: "{{ Hosts }}"
   gather_facts: yes
   vars:
     Servername: "{{ ansible_hostname }}"
-    Hosts: {{ machines }}
+    Hosts: "{{ machines }}"
   tasks:
     - name: Get Cluster information
       win_shell: |
